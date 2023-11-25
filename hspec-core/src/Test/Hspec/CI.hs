@@ -7,15 +7,18 @@ module Test.Hspec.CI (
 import           Prelude ()
 import           Test.Hspec.Core.Compat
 
-import           Test.Hspec.Core.Extension
+import           Test.Hspec.Api.Extension.V1
+import qualified Test.Hspec.Api.Extension.V1.Item as Item
+import qualified Test.Hspec.Api.Extension.V1.Spec as Spec
+import qualified Test.Hspec.Api.Extension.V1.Tree as Tree
 
 data CiOnly = CiOnly
 
 setCiOnly :: Item a -> Item a
-setCiOnly = setItemAnnotation CiOnly
+setCiOnly = Item.setAnnotation CiOnly
 
 getCiOnly :: Item a -> Maybe CiOnly
-getCiOnly = getItemAnnotation
+getCiOnly = Item.getAnnotation
 
 -- |
 -- Do not run the spec items of the given subtree by default; execute them only
@@ -35,7 +38,7 @@ getCiOnly = getItemAnnotation
 --       ..
 -- @
 only :: SpecWith a -> SpecWith a
-only = mapSpecItem setCiOnly
+only = Spec.mapItems setCiOnly
 
 newtype CiFlag = CI Bool
 
@@ -45,20 +48,23 @@ setCiFlag = setConfigAnnotation . CI
 getCiFlag :: Config -> CiFlag
 getCiFlag = fromMaybe (CI False) . getConfigAnnotation
 
-ciFlag :: Option
-ciFlag = flag "ci" setCiFlag "XXXXXXXXXX TODO XXXXXXXXXXXXXXXX"
 
 use :: SpecWith a
 use = do
   runIO (lookupEnv "CI") >>= \ case
     Nothing -> pass
     Just _ -> modifyConfig (setCiFlag True)
-  registerOption ciFlag
-  addTransformation applyTagsToSpec
+  registerOption "hspec-ci" $ flag "ci" setCiFlag "include itmes that are marked with \"CI only\""
+  addTransformation applyCiOnly
 
-applyTagsToSpec :: Config -> [SpecTree ()] -> [SpecTree ()]
-applyTagsToSpec config = case getCiFlag config of
+applyCiOnly :: Config -> [SpecTree ()] -> [SpecTree ()]
+applyCiOnly config = case getCiFlag config of
   CI True -> id
-  CI False -> mapItems $ \ item -> case getCiOnly item of
+  CI False -> Tree.mapItems $ \ item -> case getCiOnly item of
     Nothing -> item
-    Just CiOnly -> setItemPending (Just "XXXXXXXXXXXXXX TODO ci-only XXXXXXXXXXXXXXX") item
+    Just CiOnly -> Item.pendingWith message item
+  where
+    message = unlines [
+        "This item is marked as \"CI only\" and excluded by default."
+      , "Use `--ci' to include this item."
+      ]

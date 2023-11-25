@@ -47,7 +47,7 @@ spec = do
       foo ["--tag=+slow"] `shouldReturn` (1, 1, 1, 1)
 
     context "with --tags" $ do
-      let parseOptions args = snd <$> Options.parseOptions defaultConfig { configCustomOptions = [tagsOption] } "my-spec" [] Nothing [] args
+      let parseOptions args = snd <$> Options.parseOptions defaultConfig { configExtensionOptions = [("hspec-tags", [tagsOption])] } "my-spec" [] Nothing [] args
 
       it "" $ do
         getTagFilters <$> parseOptions ["--tags", "foo"] `shouldBe` Right (Map.fromList [("foo", Select)])

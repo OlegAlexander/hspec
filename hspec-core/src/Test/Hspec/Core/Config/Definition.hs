@@ -18,7 +18,7 @@ module Test.Hspec.Core.Config.Definition (
 
 , setConfigAnnotation
 , getConfigAnnotation
-, addCustomOption
+, addExtensionOptions
 , addSpecTransformation
 
 #ifdef TEST
@@ -50,11 +50,11 @@ setConfigAnnotation value config = config { configAnnotations = Annotations.setV
 getConfigAnnotation :: Typeable value => Config -> Maybe value
 getConfigAnnotation = Annotations.getValue . configAnnotations
 
-addCustomOption :: Option Config -> Config -> Config
-addCustomOption opt config = config { configCustomOptions = opt : configCustomOptions config }
+addExtensionOptions :: String -> [Option Config] -> Config -> Config
+addExtensionOptions section opts config = config { configExtensionOptions = (section, opts) : configExtensionOptions config }
 
 addSpecTransformation :: (Config -> [SpecTree ()] -> [SpecTree ()]) -> Config -> Config
-addSpecTransformation f config = config { configMapSpecForest = \ c -> f c . configMapSpecForest config c }
+addSpecTransformation f config = config { configTransformSpec = \ c -> f c . configTransformSpec config c }
 
 data ColorMode = ColorAuto | ColorNever | ColorAlways
   deriving (Eq, Show)
@@ -112,9 +112,9 @@ data Config = Config {
 , configFormatter :: Maybe V1.Formatter
 , configHtmlOutput :: Bool
 , configConcurrentJobs :: Maybe Int
-, configCustomOptions :: [Option Config] -- ^ @since 2.12.0
+, configExtensionOptions :: [(String, [Option Config])] -- ^ @since 2.12.0
 , configAnnotations :: Annotations -- ^ @since 2.12.0
-, configMapSpecForest :: Config -> [SpecTree ()] -> [SpecTree ()] -- ^ @since 2.12.0
+, configTransformSpec :: Config -> [SpecTree ()] -> [SpecTree ()] -- ^ @since 2.12.0
 }
 {-# DEPRECATED configFormatter "Use [@useFormatter@](https://hackage.haskell.org/package/hspec-api/docs/Test-Hspec-Api-Formatters-V1.html#v:useFormatter) instead." #-}
 
@@ -157,9 +157,9 @@ mkDefaultConfig formatters = Config {
 , configFormatter = Nothing
 , configHtmlOutput = False
 , configConcurrentJobs = Nothing
+, configExtensionOptions = []
 , configAnnotations = mempty
-, configCustomOptions = []
-, configMapSpecForest = \ _ -> id
+, configTransformSpec = \ _ -> id
 }
 
 defaultDiffContext :: Int

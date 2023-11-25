@@ -53,6 +53,9 @@ data Config = Config
   configFormatter :: Maybe hspec-core:Test.Hspec.Core.Formatters.V1.Monad.Formatter
   configHtmlOutput :: Bool
   configConcurrentJobs :: Maybe Int
+  configExtensionOptions :: [(String, [hspec-core:GetOpt.Declarative.Types.Option Config])]
+  configAnnotations :: hspec-core:Test.Hspec.Core.Annotations.Annotations
+  configTransformSpec :: Config -> [hspec-core:Test.Hspec.Core.Tree.SpecTree ()] -> [hspec-core:Test.Hspec.Core.Tree.SpecTree ()]
 type Path :: *
 type Path = ([String], String)
 type ResultItem :: *

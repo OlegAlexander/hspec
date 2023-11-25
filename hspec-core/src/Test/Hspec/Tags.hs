@@ -23,7 +23,10 @@ import qualified Data.Set as Set
 import           Data.Map (Map)
 import qualified Data.Map as Map
 
-import           Test.Hspec.Core.Extension
+import           Test.Hspec.Api.Extension.V1
+import qualified Test.Hspec.Api.Extension.V1.Item as Item
+import qualified Test.Hspec.Api.Extension.V1.Spec as Spec
+import qualified Test.Hspec.Api.Extension.V1.Tree as Tree
 
 newtype Tag = Tag { unTag :: String }
   deriving (Eq, Show, Ord)
@@ -32,10 +35,10 @@ instance IsString Tag where
   fromString = Tag
 
 getItemTags :: Item a -> Set Tag
-getItemTags = fromMaybe mempty . getItemAnnotation
+getItemTags = fromMaybe mempty . Item.getAnnotation
 
 setItemTags :: Set Tag -> Item a -> Item a
-setItemTags = setItemAnnotation
+setItemTags = Item.setAnnotation
 
 modifyItemTags :: (Set Tag -> Set Tag) -> Item a -> Item a
 modifyItemTags f item =  setItemTags (f $ getItemTags item) item
@@ -60,7 +63,7 @@ addItemTag = modifyItemTags . Set.insert
 --       ..
 -- @
 tag :: String -> SpecWith a -> SpecWith a
-tag = mapSpecItem . addItemTag . Tag
+tag = Spec.mapItems . addItemTag . Tag
 
 type TagFilters = Map Tag Filter
 
@@ -87,25 +90,25 @@ exclude name = addTagFilter (Tag name) . SetPending $ unlines [
 
 use :: SpecWith a
 use = do
-  registerOption tagsOption
+  registerOption "hspec-tags" tagsOption
   addTransformation filterByTags
 
 filterByTags :: Config -> [SpecTree ()] -> [SpecTree ()]
-filterByTags config = filterItems byTag . mapItems setPendingByTag
+filterByTags config = Tree.filterItems byTag . Tree.mapItems setPendingByTag
   where
     setPendingByTag :: Item () -> Item ()
     setPendingByTag item = foldl' (flip pendingBy) item pendingByTag
       where
         pendingBy :: (Tag, String) -> Item a -> Item a
         pendingBy (name, reason)
-          | name `elem` tags = setItemPending (Just reason)
+          | name `elem` tags = Item.pendingWith reason
           | otherwise  = id
 
         tags :: Set Tag
         tags = getItemTags item
 
     byTag :: Item a -> Bool
-    byTag = (||) <$> itemIsFocused <*> includeItem
+    byTag = (||) <$> Item.isFocused <*> includeItem
 
     includeItem :: Item a -> Bool
     includeItem item = and $ map include filterByTag
@@ -126,7 +129,7 @@ filterByTags config = filterItems byTag . mapItems setPendingByTag
     filterByTag = Map.toList $ getTagFilters config
 
 tagsOption :: Option
-tagsOption = option "tags" (argument "TAGS" return addTagFilters) "XXXXXXXXXXXXXXXX TODO XXXXXXXXXXXXX"
+tagsOption = option "tags" (argument "TAGS" return addTagFilters) "TAGS can be a list of tag names."
   where
     addTagFilters :: String -> Config -> Config
     addTagFilters input = modifyTagFilters $ \ start -> (foldl' (\ tags tag_ -> insertTag tag_ tags) start (parseTagFilters input))

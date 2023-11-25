@@ -22,19 +22,18 @@ type EnvVar = [String]
 envVarName :: String
 envVarName = "HSPEC_OPTIONS"
 
-commandLineOptions :: [(String, FormatConfig -> IO Format)] -> [Declarative.Option Config] -> [(String, [Declarative.Option Config])]
+commandLineOptions :: [(String, FormatConfig -> IO Format)] -> [(String, [Declarative.Option Config])] -> [(String, [Declarative.Option Config])]
 commandLineOptions formatters extensionOptions =
     ("OPTIONS", commandLineOnlyOptions)
   : otherOptions formatters extensionOptions
 
-otherOptions :: [(String, FormatConfig -> IO Format)] -> [Declarative.Option Config] -> [(String, [Declarative.Option Config])]
+otherOptions :: [(String, FormatConfig -> IO Format)] -> [(String, [Declarative.Option Config])] -> [(String, [Declarative.Option Config])]
 otherOptions formatters extensionOptions = [
     ("RUNNER OPTIONS", runnerOptions)
   , ("FORMATTER OPTIONS", formatterOptions formatters)
   , ("OPTIONS FOR QUICKCHECK", quickCheckOptions)
   , ("OPTIONS FOR SMALLCHECK", smallCheckOptions)
-  , ("OPTIONS FOR EXTENSIONS", extensionOptions)
-  ]
+  ] ++ extensionOptions
 
 ignoreConfigFile :: Config -> [String] -> IO Bool
 ignoreConfigFile config args = do
@@ -59,14 +58,14 @@ parseCommandLineOptions prog args config = case Declarative.parseCommandLineOpti
   Failure message -> Left (ExitFailure 1, message)
   where
     formatters = configAvailableFormatters config
-    extensionOptions = configCustomOptions config
+    extensionOptions = configExtensionOptions config
 
 parseEnvironmentOptions :: [(String, String)] -> Config -> Either (ExitCode, String) ([String], Config)
 parseEnvironmentOptions env config = case Declarative.parseEnvironmentOptions "HSPEC" env config (concatMap snd $ commandLineOptions formatters extensionOptions) of
   (warnings, c) -> Right (map formatWarning warnings, c)
   where
     formatters = configAvailableFormatters config
-    extensionOptions = configCustomOptions config
+    extensionOptions = configExtensionOptions config
     formatWarning (Declarative.InvalidValue name value) = "invalid value `" ++ value ++ "' for environment variable " ++ name
 
 parseFileOptions :: String -> Config -> ConfigFile -> Either (ExitCode, String) Config
@@ -86,7 +85,7 @@ parseOtherOptions prog source args config = case parse (interpretOptions options
     options = filter Declarative.optionDocumented $ concatMap snd (otherOptions formatters extensionOptions)
 
     formatters = configAvailableFormatters config
-    extensionOptions = configCustomOptions config
+    extensionOptions = configExtensionOptions config
 
     failure err = Left (ExitFailure 1, prog ++ ": " ++ message)
       where

@@ -419,7 +419,7 @@ specToEvalForest config =
   >>> addDefaultDescriptions
   >>> failFocusedItems config
   >>> failPendingItems config
-  >>> configMapSpecForest config config
+  >>> configTransformSpec config config
   >>> focusSpec config
   >>> toEvalItemForest params
   >>> applyDryRun config

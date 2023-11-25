@@ -1,0 +1,13 @@
+getAnnotation :: base:Data.Typeable.Internal.Typeable value => Item a -> Maybe value
+isFocused :: Item a -> Bool
+pending :: Item a -> Item a
+pendingWith :: String -> Item a -> Item a
+setAnnotation :: base:Data.Typeable.Internal.Typeable value => value -> Item a -> Item a
+type Item :: * -> *
+data Item a = hspec-core:Test.Hspec.Core.Tree.Item
+  hspec-core:Test.Hspec.Core.Tree.itemRequirement :: String
+  hspec-core:Test.Hspec.Core.Tree.itemLocation :: Maybe hspec-core:Test.Hspec.Core.Example.Location.Location
+  hspec-core:Test.Hspec.Core.Tree.itemIsParallelizable :: Maybe Bool
+  hspec-core:Test.Hspec.Core.Tree.itemIsFocused :: Bool
+  hspec-core:Test.Hspec.Core.Tree.itemAnnotations :: hspec-core:Test.Hspec.Core.Annotations.Annotations
+  hspec-core:Test.Hspec.Core.Tree.itemExample :: hspec-core:Test.Hspec.Core.Example.Params -> (hspec-core:Test.Hspec.Core.Example.ActionWith a -> IO ()) -> hspec-core:Test.Hspec.Core.Example.ProgressCallback -> IO hspec-core:Test.Hspec.Core.Example.Result

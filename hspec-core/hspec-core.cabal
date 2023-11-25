@@ -56,6 +56,10 @@ library
   exposed-modules:
       Test.Hspec.CI
       Test.Hspec.Tags
+      Test.Hspec.Api.Extension.V1
+      Test.Hspec.Api.Extension.V1.Item
+      Test.Hspec.Api.Extension.V1.Spec
+      Test.Hspec.Api.Extension.V1.Tree
       Test.Hspec.Core.Spec
       Test.Hspec.Core.Hooks
       Test.Hspec.Core.Runner
@@ -80,7 +84,6 @@ library
       Test.Hspec.Core.Config.Options
       Test.Hspec.Core.Example
       Test.Hspec.Core.Example.Location
-      Test.Hspec.Core.Extension
       Test.Hspec.Core.FailureReport
       Test.Hspec.Core.Formatters.Diff
       Test.Hspec.Core.Formatters.Internal
@@ -154,6 +157,10 @@ test-suite spec
       GetOpt.Declarative.Types
       GetOpt.Declarative.Util
       NonEmpty
+      Test.Hspec.Api.Extension.V1
+      Test.Hspec.Api.Extension.V1.Item
+      Test.Hspec.Api.Extension.V1.Spec
+      Test.Hspec.Api.Extension.V1.Tree
       Test.Hspec.CI
       Test.Hspec.Core.Annotations
       Test.Hspec.Core.Clock
@@ -163,7 +170,6 @@ test-suite spec
       Test.Hspec.Core.Config.Options
       Test.Hspec.Core.Example
       Test.Hspec.Core.Example.Location
-      Test.Hspec.Core.Extension
       Test.Hspec.Core.FailureReport
       Test.Hspec.Core.Format
       Test.Hspec.Core.Formatters

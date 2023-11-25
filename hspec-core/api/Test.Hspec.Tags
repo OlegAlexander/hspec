@@ -1,0 +1,3 @@
+exclude :: String -> hspec-core:Test.Hspec.Core.Spec.Monad.SpecWith a
+tag :: String -> hspec-core:Test.Hspec.Core.Spec.Monad.SpecWith a -> hspec-core:Test.Hspec.Core.Spec.Monad.SpecWith a
+use :: hspec-core:Test.Hspec.Core.Spec.Monad.SpecWith a

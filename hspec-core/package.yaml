@@ -54,6 +54,10 @@ library:
   exposed-modules:
     - Test.Hspec.CI
     - Test.Hspec.Tags
+    - Test.Hspec.Api.Extension.V1
+    - Test.Hspec.Api.Extension.V1.Item
+    - Test.Hspec.Api.Extension.V1.Spec
+    - Test.Hspec.Api.Extension.V1.Tree
     - Test.Hspec.Core.Spec
     - Test.Hspec.Core.Hooks
     - Test.Hspec.Core.Runner
